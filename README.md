@@ -44,9 +44,9 @@ O servidor rodará em `http://localhost:3000`.
 
 ## Integrantes
 
-- [Nome 1]
-- [Nome 2]
-- [Nome 3]
+- Heitor
+- Joao Vitor
+- Joao Hector
 
 ---
 
