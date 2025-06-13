@@ -49,7 +49,7 @@ function renderLogin() {
       <div class="col-md-5">
         <div class="card card-tech p-4">
           <h3 class="mb-3 text-center">Login</h3>
-          <form>
+          <form id="login-form">
             <div class="mb-3">
               <label for="loginEmail" class="form-label">E-mail</label>
               <input type="email" class="form-control" id="loginEmail" required>
@@ -61,11 +61,39 @@ function renderLogin() {
             <div class="d-grid">
               <button type="submit" class="btn btn-tech">Entrar</button>
             </div>
+            <div id="login-msg" class="mt-3 text-center text-danger"></div>
           </form>
         </div>
       </div>
     </div>
   `;
+
+  document.getElementById('login-form').onsubmit = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const senha = document.getElementById('loginPassword').value;
+    const msg = document.getElementById('login-msg');
+    msg.textContent = "Verificando...";
+
+    // Busca usuários e verifica se existe
+    try {
+      const res = await fetch('http://localhost:3000/usuarios');
+      const users = await res.json();
+      const user = users.find(u => u.email === email && u.senha === senha);
+      if (user) {
+        msg.classList.remove('text-danger');
+        msg.classList.add('text-success');
+        msg.textContent = "Login realizado com sucesso!";
+        // Aqui você pode salvar o usuário logado em localStorage/sessionStorage se quiser
+      } else {
+        msg.classList.remove('text-success');
+        msg.classList.add('text-danger');
+        msg.textContent = "E-mail ou senha inválidos.";
+      }
+    } catch {
+      msg.textContent = "Erro ao conectar ao servidor.";
+    }
+  };
 }
 
 function renderRegister() {
@@ -74,7 +102,7 @@ function renderRegister() {
       <div class="col-md-5">
         <div class="card card-tech p-4">
           <h3 class="mb-3 text-center">Cadastro</h3>
-          <form>
+          <form id="register-form">
             <div class="mb-3">
               <label for="registerName" class="form-label">Nome</label>
               <input type="text" class="form-control" id="registerName" required>
@@ -90,11 +118,46 @@ function renderRegister() {
             <div class="d-grid">
               <button type="submit" class="btn btn-tech">Cadastrar</button>
             </div>
+            <div id="register-msg" class="mt-3 text-center"></div>
           </form>
         </div>
       </div>
     </div>
   `;
+
+  document.getElementById('register-form').onsubmit = async function(e) {
+    e.preventDefault();
+    const nome = document.getElementById('registerName').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const senha = document.getElementById('registerPassword').value.trim();
+    const msg = document.getElementById('register-msg');
+    msg.textContent = "Enviando...";
+
+    if (!nome || !email || !senha) {
+      msg.className = "mt-3 text-center text-danger";
+      msg.textContent = "Preencha todos os campos.";
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:3000/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, email, senha })
+      });
+      if (res.ok) {
+        msg.className = "mt-3 text-center text-success";
+        msg.textContent = "Cadastro realizado com sucesso!";
+      } else {
+        const data = await res.json();
+        msg.className = "mt-3 text-center text-danger";
+        msg.textContent = data.erro || "Erro ao cadastrar.";
+      }
+    } catch {
+      msg.className = "mt-3 text-center text-danger";
+      msg.textContent = "Erro ao conectar ao servidor.";
+    }
+  };
 }
 
 function renderDashboard() {
@@ -111,7 +174,8 @@ function renderDashboard() {
         <div class="col-md-4">
           <div class="card card-tech text-center p-4">
             <h5>Usuários</h5>
-            <p class="display-6 fw-bold">+100</p>
+            <p class="display-6 fw-bold" id="dashboard-users">...</p>
+            <div id="users-list" style="max-height:120px;overflow:auto;font-size:0.95em;"></div>
           </div>
         </div>
         <div class="col-md-4">
@@ -128,6 +192,20 @@ function renderDashboard() {
     .then(res => res.json())
     .then(data => {
       document.getElementById('dashboard-products').textContent = data.length;
+    });
+
+  // Atualiza número de usuários via API do back-end
+  fetch('http://localhost:3000/usuarios')
+    .then(res => res.json())
+    .then(users => {
+      document.getElementById('dashboard-users').textContent = users.length;
+      document.getElementById('users-list').innerHTML = users.map(u =>
+        `<div>${u.nome} <span class="text-muted" style="font-size:0.85em;">(${u.email})</span></div>`
+      ).join('');
+    })
+    .catch(() => {
+      document.getElementById('dashboard-users').textContent = 'Erro';
+      document.getElementById('users-list').innerHTML = '';
     });
 }
 
