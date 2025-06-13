@@ -52,7 +52,9 @@ function renderLogin() {
           <form id="login-form">
             <div class="mb-3">
               <label for="loginEmail" class="form-label">E-mail</label>
-              <input type="email" class="form-control" id="loginEmail" required>
+              <input type="email" class="form-control" id="loginEmail" required
+                oninvalid="this.setCustomValidity('Digite um e-mail válido.')"
+                oninput="this.setCustomValidity('')">
             </div>
             <div class="mb-3">
               <label for="loginPassword" class="form-label">Senha</label>
@@ -109,7 +111,9 @@ function renderRegister() {
             </div>
             <div class="mb-3">
               <label for="registerEmail" class="form-label">E-mail</label>
-              <input type="email" class="form-control" id="registerEmail" required>
+              <input type="email" class="form-control" id="registerEmail" required
+                oninvalid="this.setCustomValidity('Digite um e-mail válido.')"
+                oninput="this.setCustomValidity('')">
             </div>
             <div class="mb-3">
               <label for="registerPassword" class="form-label">Senha</label>
@@ -156,7 +160,7 @@ function renderRegister() {
     } catch {
       msg.className = "mt-3 text-center text-danger";
       msg.textContent = "Erro ao conectar ao servidor.";
-    }
+    }t
   };
 }
 
